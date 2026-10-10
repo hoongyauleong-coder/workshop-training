@@ -12,7 +12,13 @@ Built during the AI Accelerator Founder Club workshop with Claude Code.
 | `walkthrough-findings-sample.csv` | Sample output of the walkthrough skill (fictional data). Opens in Excel. |
 | `CLAUDE.md` / `business-brain.md` | Context Claude Code reads automatically when working in this folder. |
 
-## CAR/PAR Email Automation (`car-automation/`)
+## CAR/PAR Web App (`car-app/`) – Vercel + Supabase
+
+The full CAR/PAR system as a web app: auditor login and dashboard, owner pages with **Received / Dispute / photo evidence upload**, Gmail SMTP emails, and a daily 08:00 MYT reminder run on Vercel Cron. Same workflow and email wording as the Apps Script version below.
+
+👉 **Deploy guide: [`car-app/DEPLOY.md`](car-app/DEPLOY.md)**
+
+## CAR/PAR Email Automation (`car-automation/`) – Google Sheets version
 
 Full walkthrough-to-closure automation on **Google Sheets + Apps Script**:
 
