@@ -12,6 +12,20 @@ Built during the AI Accelerator Founder Club workshop with Claude Code.
 | `walkthrough-findings-sample.csv` | Sample output of the walkthrough skill (fictional data). Opens in Excel. |
 | `CLAUDE.md` / `business-brain.md` | Context Claude Code reads automatically when working in this folder. |
 
+## CAR/PAR Email Automation (`car-automation/`)
+
+Full walkthrough-to-closure automation on **Google Sheets + Apps Script**:
+
+- NC email to the owner with **Received** / **Dispute** buttons
+- Daily "please acknowledge" reminder until Received is clicked
+- **14-working-day** closure clock from acknowledgement (skips weekends and Malaysia + Penang public holidays)
+- Reminders: 5 days before due → 1 day after due → +3 days cc HOD → every 3 days cc HOD until closed
+- Evidence via Google Form (pauses reminders), auditor verifies → Close or Reject
+- Extensions, reassignment, effectiveness check 30 working days after closure
+- Every email logged in `Email_Log`, plus a `Dashboard`
+
+👉 **Setup guide: [`car-automation/SETUP.md`](car-automation/SETUP.md)**
+
 ## How to use the Reminder Generator
 
 1. Open `reminder-generator.html` in a browser.
