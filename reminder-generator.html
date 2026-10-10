@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compliance Reminder Generator</title>
+<style>
+  :root {
+    --bg: #f5f6f3;
+    --surface: #ffffff;
+    --ink: #1c2321;
+    --muted: #5d6864;
+    --line: #dde2de;
+    --accent: #1f4e79;
+    --accent-ink: #ffffff;
+    --soon: #2563a8;   --soon-soft: #e5eef8;
+    --l1: #8a6d00;     --l1-soft: #fbf3d6;
+    --l2: #c2571a;     --l2-soft: #fbe9dd;
+    --l3: #b42318;     --l3-soft: #fbe4e2;
+    --ok: #2f7d4f;     --ok-soft: #e4f1e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131715;
+      --surface: #1c211f;
+      --ink: #e7ebe8;
+      --muted: #a1aba6;
+      --line: #2e3532;
+      --accent: #8bb8e8;
+      --accent-ink: #0f1a24;
+      --soon: #8bb8e8;   --soon-soft: #1d2a38;
+      --l1: #e7c75a;     --l1-soft: #332c14;
+      --l2: #f0965c;     --l2-soft: #3a2619;
+      --l3: #f38b80;     --l3-soft: #3c1e1b;
+      --ok: #6cc28f;     --ok-soft: #1f3327;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 32px 0 20px; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ok); }
+  h1 { font-size: clamp(24px, 5vw, 34px); line-height: 1.2; margin: 6px 0 8px; }
+  .lead { color: var(--muted); max-width: 680px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-top: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 4px; }
+  .hint { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+  textarea, input[type=text], input[type=date], input[type=number] {
+    width: 100%; font: inherit; color: var(--ink); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+  }
+  textarea.paste { min-height: 150px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; white-space: pre; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; align-items: center; }
+  button {
+    font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px;
+    padding: 9px 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button:hover { filter: brightness(.96); }
+  button.small { padding: 6px 12px; font-size: 13px; }
+  details.settings summary { cursor: pointer; font-weight: 600; }
+  .settings-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 14px; }
+  .settings-grid label { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+  .stats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-top: 20px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; border-top: 4px solid var(--c); }
+  .stat b { display: block; font-size: 28px; line-height: 1.1; color: var(--c); }
+  .stat span { color: var(--muted); font-size: 13px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 12px; }
+  .tabs button { border-radius: 999px; font-size: 13px; padding: 6px 14px; }
+  .tabs button.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .warn { background: var(--l1-soft); color: var(--l1); border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 13px; }
+  .cards { display: grid; gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--c); border-radius: 12px; padding: 18px; }
+  .card.sent { opacity: .55; }
+  .card-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: flex-start; }
+  .who b { font-size: 17px; }
+  .who div { color: var(--muted); font-size: 13px; word-break: break-all; }
+  .badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--cs); color: var(--c); white-space: nowrap; }
+  .subject { margin-top: 12px; font-weight: 600; }
+  .subject input { font-weight: 600; }
+  .card textarea.body { margin-top: 8px; min-height: 260px; font-size: 14px; }
+  .card label.sent-tick { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); margin-left: auto; cursor: pointer; }
+  .empty { color: var(--muted); text-align: center; padding: 32px; border: 1px dashed var(--line); border-radius: 12px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--surface); padding: 10px 18px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .lvl-soon { --c: var(--soon); --cs: var(--soon-soft); }
+  .lvl-1 { --c: var(--l1); --cs: var(--l1-soft); }
+  .lvl-2 { --c: var(--l2); --cs: var(--l2-soft); }
+  .lvl-3 { --c: var(--l3); --cs: var(--l3-soft); }
+  .lvl-ok { --c: var(--ok); --cs: var(--ok-soft); }
+  .ok-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ok-table td, .ok-table th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  .ok-table th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  .table-wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Jabatan Pematuhan · Compliance Department</div>
+  <h1>Compliance Reminder Generator</h1>
+  <p class="lead">Paste your Excel tracker. Every person gets one reminder covering all their open items, written at the right escalation level, ready to send through ECOM.</p>
+</header>
+
+<section class="panel">
+  <h2>1. Paste dari Excel</h2>
+  <p class="hint">Select your rows in Excel <b>including the header row</b>, copy, and paste below. Columns recognised (English or BM): Name/Nama, Email/Emel, Department/Jabatan, CAR No, Description/Isu, Due Date/Tarikh Akhir, Status, Manager/Pengurus, Manager Email. Only Name, Due Date and either CAR No or Description are required. Dates are read as dd/mm/yyyy.</p>
+  <textarea id="paste" class="paste" spellcheck="false" placeholder="Name&#9;Email&#9;CAR No&#9;Description&#9;Due Date&#9;Status&#9;Manager&#9;Manager Email"></textarea>
+  <div class="row">
+    <button class="primary" id="go">Jana Peringatan / Generate</button>
+    <button id="sample">Load sample data</button>
+    <label class="hint" style="margin:0"><input type="file" id="file" accept=".csv,.tsv,.txt"> or open a CSV</label>
+  </div>
+  <div id="warnings"></div>
+</section>
+
+<section class="panel">
+  <details class="settings">
+    <summary>Settings: tarikh, escalation levels &amp; signature</summary>
+    <div class="settings-grid">
+      <label>Tarikh hari ini (today)<input type="date" id="today"></label>
+      <label>"Due soon" = within (days)<input type="number" id="soonDays" min="0" value="7"></label>
+      <label>#2 Firm from (days overdue)<input type="number" id="l2From" min="2" value="4"></label>
+      <label>#3 Escalation from (days overdue)<input type="number" id="l3From" min="3" value="8"></label>
+      <label>Nama pengirim<input type="text" id="sender" value="HoongYau"></label>
+      <label>Jawatan<input type="text" id="title" value="ISO 14001 Auditor | CePSWaM"></label>
+      <label>Jabatan<input type="text" id="dept" value="Jabatan Pematuhan"></label>
+    </div>
+  </details>
+</section>
+
+<div id="results"></div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem('crg:' + k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem('crg:' + k, v); } catch (e) {} }
+  };
+
+  // ---------- dates ----------
+  const DAY = 86400000;
+  function mk(y, m, d) {
+    const dt = new Date(y, m, d);
+    return (dt.getFullYear() === y && dt.getMonth() === m && dt.getDate() === d) ? dt : null;
+  }
+  const MONTHS = { jan:0, feb:1, mar:2, mac:2, apr:3, may:4, mei:4, jun:5, jul:6, aug:7, ogo:7, sep:8, oct:9, okt:9, nov:10, dec:11, dis:11 };
+  function parseDate(s) {
+    s = String(s || '').trim();
+    if (!s) return null;
+    let m;
+    if (/^\d{5}(\.\d+)?$/.test(s)) { // Excel serial
+      const u = new Date(Date.UTC(1899, 11, 30) + Math.floor(+s) * DAY);
+      return mk(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate());
+    }
+    if ((m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))) return mk(+m[1], +m[2] - 1, +m[3]);
+    if ((m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})$/))) {
+      let y = +m[3]; if (y < 100) y += 2000;
+      return mk(y, +m[2] - 1, +m[1]);
+    }
+    if ((m = s.match(/^(\d{1,2})[\s\-]+([A-Za-z]{3,})[\s\-,]+(\d{2,4})$/))) {
+      const mo = MONTHS[m[2].slice(0, 3).toLowerCase()];
+      let y = +m[3]; if (y < 100) y += 2000;
+      return mo === undefined ? null : mk(y, mo, +m[1]);
+    }
+    return null;
+  }
+  const pad = (n) => String(n).padStart(2, '0');
+  const fmt = (d) => pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+  const iso = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const daysBetween = (a, b) => Math.round((a - b) / DAY);
+  function addWorkingDays(d, n) {
+    const r = new Date(d);
+    while (n > 0) { r.setDate(r.getDate() + 1); const w = r.getDay(); if (w !== 0 && w !== 6) n--; }
+    return r;
+  }
+  function todayDate() {
+    const v = $('today').value;
+    const d = v ? parseDate(v) : null;
+    if (d) return d;
+    const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  }
+
+  // ---------- parsing ----------
+  function parseDelimited(text) {
+    const delim = text.indexOf('\t') !== -1 ? '\t' : ',';
+    const rows = []; let row = [], cell = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+        else cell += c;
+      } else if (c === '"' && cell === '') q = true;
+      else if (c === delim) { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); rows.push(row); row = []; cell = '';
+      } else cell += c;
+    }
+    if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+    return rows.filter(r => r.some(c => c.trim() !== ''));
+  }
+
+  const FIELDS = [
+    ['mgrEmail', ['manager email', 'emel pengurus', 'hod email', 'manager e-mail', 'email pengurus']],
+    ['mgr', ['manager', 'manager name', 'pengurus', 'nama pengurus', 'hod', 'ketua jabatan']],
+    ['email', ['email', 'emel', 'e-mail', 'email address']],
+    ['name', ['name', 'nama', 'pic', 'person in charge', 'employee', 'pekerja']],
+    ['item', ['car no', 'car no.', 'car', 'car number', 'ref', 'ref no', 'rujukan', 'finding no', 'finding no.', 'no. car', 'item']],
+    ['desc', ['description', 'desc', 'issue', 'isu', 'huraian', 'perkara', 'finding', 'details', 'corrective action', 'tindakan']],
+    ['due', ['due date', 'due', 'deadline', 'tarikh akhir', 'target date', 'tarikh']],
+    ['status', ['status']],
+    ['dept', ['department', 'dept', 'jabatan', 'area', 'kawasan', 'section', 'bahagian']]
+  ];
+  function mapHeaders(headers) {
+    const map = {};
+    const norm = headers.map(h => h.trim().toLowerCase().replace(/\s+/g, ' '));
+    norm.forEach((h, i) => { // exact pass
+      for (const [f, al] of FIELDS) if (!(f in map) && al.includes(h)) { map[f] = i; return; }
+    });
+    norm.forEach((h, i) => { // contains pass
+      if (Object.values(map).includes(i)) return;
+      for (const [f, al] of FIELDS) if (!(f in map) && al.some(a => a.length > 3 && h.includes(a))) { map[f] = i; return; }
+    });
+    return map;
+  }
+
+  const CLOSED = /^(closed?|selesai|done|complete[d]?|tutup|ditutup|ok)$/i;
+
+  // ---------- classify ----------
+  function classify(items, cfg) {
+    const today = cfg.today;
+    items.forEach(it => {
+      if (it.closed) { it.level = 'closed'; return; }
+      const d = daysBetween(today, it.due);
+      it.diff = d;
+      if (d >= cfg.l3From) it.level = 3;
+      else if (d >= cfg.l2From) it.level = 2;
+      else if (d >= 1) it.level = 1;
+      else if (-d <= cfg.soonDays) it.level = 'soon';
+      else it.level = 'ok';
+    });
+    const rank = { closed: -2, ok: -1, soon: 0, 1: 1, 2: 2, 3: 3 };
+    const people = new Map();
+    items.forEach(it => {
+      const key = (it.email || it.name).toLowerCase();
+      if (!people.has(key)) people.set(key, { key, name: it.name, email: it.email, dept: it.dept, mgr: it.mgr, mgrEmail: it.mgrEmail, items: [] });
+      const p = people.get(key);
+      p.items.push(it);
+      p.mgr = p.mgr || it.mgr; p.mgrEmail = p.mgrEmail || it.mgrEmail; p.dept = p.dept || it.dept;
+    });
+    people.forEach(p => {
+      p.level = p.items.reduce((best, it) => rank[it.level] > rank[best] ? it.level : best, 'closed');
+      p.action = p.items.filter(it => rank[it.level] >= 0).sort((a, b) => b.diff - a.diff);
+    });
+    return [...people.values()];
+  }
+
+  // ---------- emails ----------
+  const LABEL = { soon: 'Due Soon', 1: '#1 Peringatan', 2: '#2 Tindakan Segera', 3: '#3 Eskalasi', ok: 'On Track', closed: 'Closed' };
+  function itemLine(it, i) {
+    const head = [it.item, it.desc].filter(Boolean).join(' – ');
+    let when;
+    if (it.diff > 0) when = 'lewat ' + it.diff + ' hari / ' + it.diff + ' day' + (it.diff > 1 ? 's' : '') + ' overdue';
+    else if (it.diff === 0) when = 'tamat hari ini / due today';
+    else when = (-it.diff) + ' hari lagi / due in ' + (-it.diff) + ' day' + (-it.diff > 1 ? 's' : '');
+    return (i + 1) + '. ' + head + '\n   Tarikh akhir: ' + fmt(it.due) + ' (' + when + ')';
+  }
+  function buildEmail(p, cfg) {
+    const lines = p.action.map(itemLine).join('\n\n');
+    const n = p.action.length;
+    const plural = n > 1;
+    const sig = '\n\n' + cfg.sender + '\n' + cfg.title + '\n' + cfg.dept;
+    const ref = p.action.length === 1 && p.action[0].item ? ' ' + p.action[0].item : '';
+    let subject, body, cc = '';
+    if (p.level === 'soon') {
+      subject = 'Makluman Awal: Tindakan Pematuhan' + ref + ' Akan Tamat Tempoh';
+      body = 'Kepada ' + p.name + ',\n\n' +
+        'This is an advance notice that the following compliance action' + (plural ? 's' : '') + ' under your responsibility will be due soon:\n\n' +
+        lines + '\n\n' +
+        'Mohon pastikan tindakan diselesaikan dan bukti penutupan dikemukakan sebelum tarikh akhir.\n\n' +
+        'Sekian, terima kasih.';
+    } else if (p.level === 1) {
+      const by = fmt(addWorkingDays(cfg.today, 3));
+      subject = 'Peringatan: Tindakan Pembetulan' + ref + ' – Status Diperlukan';
+      body = 'Kepada ' + p.name + ',\n\n' +
+        'This is a reminder that the following corrective action' + (plural ? 's have' : ' has') + ' passed the due date and ' + (plural ? 'remain' : 'remains') + ' open:\n\n' +
+        lines + '\n\n' +
+        'Mohon kemas kini status dan kemukakan bukti penutupan (gambar, rekod atau dokumen berkaitan) sebelum ' + by + '.\n\n' +
+        'If there are any constraints, please let me know so we can discuss.\n\n' +
+        'Sekian, terima kasih.';
+    } else if (p.level === 2) {
+      const by = fmt(addWorkingDays(cfg.today, 2));
+      subject = '[TINDAKAN SEGERA] Tindakan Pembetulan' + ref + ' Masih Belum Ditutup';
+      body = 'Kepada ' + p.name + ',\n\n' +
+        'Merujuk kepada peringatan sebelum ini, tindakan pembetulan berikut masih belum ditutup dan telah melepasi tarikh akhir:\n\n' +
+        lines + '\n\n' +
+        (plural ? 'These findings relate' : 'This finding relates') + ' to compliance with company SOP and DOE/DOSH requirements. Open items are a risk to the company during any audit or inspection.\n\n' +
+        'Anda dikehendaki:\n' +
+        '☐ Melengkapkan tindakan pembetulan\n' +
+        '☐ Mengemukakan bukti penutupan\n' +
+        '☐ Memaklumkan kepada saya sebelum ' + by + ', jam 5.00 petang\n\n' +
+        'Failure to respond by this date will result in escalation to your Head of Department.\n\n' +
+        'Sekian.';
+    } else if (p.level === 3) {
+      const by = fmt(addWorkingDays(cfg.today, 3));
+      const mgr = p.mgr || 'Ketua Jabatan';
+      cc = p.mgrEmail || '';
+      subject = '[ESKALASI] Tindakan Pembetulan Tertunggak' + ref + (p.dept ? ' – ' + p.dept : '');
+      body = 'Kepada ' + p.name + ',\n' +
+        'Untuk makluman ' + mgr + ',\n\n' +
+        'Tindakan pembetulan berikut telah melepasi tarikh akhir. Peringatan telah dihantar sebelum ini, namun tiada maklum balas atau bukti penutupan diterima sehingga hari ini.\n\n' +
+        lines + '\n\n' +
+        (plural ? 'These items are non-compliances' : 'This item is a non-compliance') + ' against company SOP and/or legal requirements, and will be recorded as outstanding in the next management review and audit report.\n\n' +
+        mgr + ', mohon kerjasama tuan/puan untuk memastikan tindakan ini ditutup sebelum ' + by + '.\n\n' +
+        'Sekian, terima kasih.';
+    }
+    return { subject, body: body + sig, cc };
+  }
+
+  // ---------- render ----------
+  let people = [], filter = 'action', sent = new Set();
+  const escapeHtml = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const lvlClass = (l) => l === 'soon' ? 'lvl-soon' : (l === 'ok' || l === 'closed') ? 'lvl-ok' : 'lvl-' + l;
+
+  function cfg() {
+    return {
+      today: todayDate(),
+      soonDays: Math.max(0, +$('soonDays').value || 0),
+      l2From: Math.max(2, +$('l2From').value || 4),
+      l3From: Math.max(3, +$('l3From').value || 8),
+      sender: $('sender').value.trim() || 'HoongYau',
+      title: $('title').value.trim(),
+      dept: $('dept').value.trim()
+    };
+  }
+
+  function generate() {
+    const text = $('paste').value;
+    store.set('paste', text);
+    const warn = [];
+    const rows = parseDelimited(text);
+    if (rows.length < 2) { $('warnings').innerHTML = '<div class="warn">Paste at least a header row and one data row.</div>'; $('results').innerHTML = ''; return; }
+    const map = mapHeaders(rows[0]);
+    const missing = ['name', 'due'].filter(f => !(f in map));
+    if (!('item' in map) && !('desc' in map)) missing.push('CAR No or Description');
+    if (missing.length) {
+      $('warnings').innerHTML = '<div class="warn">Could not find column(s): <b>' + escapeHtml(missing.join(', ')) + '</b>. Check your header row.</div>';
+      $('results').innerHTML = ''; return;
+    }
+    const get = (r, f) => (f in map ? (r[map[f]] || '').trim() : '');
+    const items = [];
+    rows.slice(1).forEach((r, i) => {
+      const name = get(r, 'name');
+      if (!name) return;
+      const due = parseDate(get(r, 'due'));
+      if (!due) { warn.push('Row ' + (i + 2) + ' (' + name + '): tarikh "' + get(r, 'due') + '" tidak dapat dibaca'); return; }
+      items.push({
+        name, email: get(r, 'email'), item: get(r, 'item'), desc: get(r, 'desc'), due,
+        closed: CLOSED.test(get(r, 'status')), dept: get(r, 'dept'), mgr: get(r, 'mgr'), mgrEmail: get(r, 'mgrEmail')
+      });
+    });
+    if (!('email' in map)) warn.push('No Email column found. "Open in Email" will open without a recipient.');
+    $('warnings').innerHTML = warn.length ? '<div class="warn">' + warn.map(escapeHtml).join('<br>') + '</div>' : '';
+    const c = cfg();
+    people = classify(items, c);
+    people.forEach(p => { if (p.action.length && p.level !== 'ok' && p.level !== 'closed') p.email_ = buildEmail(p, c); });
+    sent = new Set();
+    render();
+  }
+
+  function render() {
+    const count = (l) => people.filter(p => p.level === l).length;
+    const stats = [
+      ['lvl-3', count(3), '#3 Eskalasi'], ['lvl-2', count(2), '#2 Tindakan Segera'],
+      ['lvl-1', count(1), '#1 Peringatan'], ['lvl-soon', count('soon'), 'Due soon'],
+      ['lvl-ok', count('ok') + count('closed'), 'On track / closed']
+    ];
+    const tabs = [['action', 'Semua perlu tindakan'], ['3', '#3 Eskalasi'], ['2', '#2 Segera'], ['1', '#1 Peringatan'], ['soon', 'Due soon'], ['ok', 'On track / closed']];
+    let html = '<div class="stats">' + stats.map(s => '<div class="stat ' + s[0] + '"><b>' + s[1] + '</b><span>' + s[2] + '</span></div>').join('') + '</div>';
+    html += '<div class="tabs">' + tabs.map(t => '<button data-f="' + t[0] + '" class="' + (filter === t[0] ? 'on' : '') + '">' + t[1] + '</button>').join('') +
+      '<button id="export" style="margin-left:auto">Export reminder log (CSV)</button></div>';
+
+    if (filter === 'ok') {
+      const rows = [];
+      people.forEach(p => p.items.filter(it => it.level === 'ok' || it.level === 'closed').forEach(it => rows.push([p.name, it.item, it.desc, fmt(it.due), it.level === 'closed' ? 'Closed' : 'On track'])));
+      html += rows.length
+        ? '<div class="panel table-wrap"><table class="ok-table"><tr><th>Nama</th><th>CAR</th><th>Description</th><th>Tarikh akhir</th><th>Status</th></tr>' +
+          rows.map(r => '<tr>' + r.map(c => '<td>' + escapeHtml(c || '–') + '</td>').join('') + '</tr>').join('') + '</table></div>'
+        : '<div class="empty">Nothing here.</div>';
+    } else {
+      const order = { 3: 0, 2: 1, 1: 2, soon: 3 };
+      const list = people.filter(p => p.email_ && (filter === 'action' || String(p.level) === filter))
+        .sort((a, b) => order[a.level] - order[b.level] || a.name.localeCompare(b.name));
+      html += list.length ? '<div class="cards">' + list.map(cardHtml).join('') + '</div>' : '<div class="empty">Tiada peringatan diperlukan untuk kategori ini. 👍</div>';
+    }
+    $('results').innerHTML = html;
+  }
+
+  function cardHtml(p) {
+    const e = p.email_;
+    const idx = people.indexOf(p);
+    const isSent = sent.has(p.key);
+    return '<div class="card ' + lvlClass(p.level) + (isSent ? ' sent' : '') + '" data-i="' + idx + '">' +
+      '<div class="card-head"><div class="who"><b>' + escapeHtml(p.name) + '</b>' +
+      '<div>' + escapeHtml(p.email || 'no email') + (e.cc ? ' · cc ' + escapeHtml(e.cc) : '') + (p.dept ? ' · ' + escapeHtml(p.dept) : '') + '</div></div>' +
+      '<span class="badge">' + LABEL[p.level] + ' · ' + p.action.length + ' item' + (p.action.length > 1 ? 's' : '') + '</span></div>' +
+      '<div class="subject"><input type="text" class="subj" value="' + escapeHtml(e.subject) + '"></div>' +
+      '<textarea class="body">' + escapeHtml(e.body) + '</textarea>' +
+      '<div class="row">' +
+      '<button class="small primary" data-act="copy">Copy subject + email</button>' +
+      '<button class="small" data-act="copybody">Copy email only</button>' +
+      '<button class="small" data-act="mail">Open in Email</button>' +
+      '<label class="sent-tick"><input type="checkbox" data-act="sent"' + (isSent ? ' checked' : '') + '> Dihantar / sent</label>' +
+      '</div></div>';
+  }
+
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 1600);
+  }
+  async function copy(text) {
+    try { await navigator.clipboard.writeText(text); }
+    catch (e) {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); ta.remove();
+    }
+    toast('Copied ✓');
+  }
+
+  function exportLog() {
+    const c = cfg();
+    const q = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+    const lines = [['Generated', 'Name', 'Email', 'CC', 'Level', 'CAR / Item', 'Due Date', 'Days Overdue', 'Sent'].map(q).join(',')];
+    people.filter(p => p.email_).forEach(p => p.action.forEach(it => {
+      lines.push([fmt(c.today), p.name, p.email, p.email_.cc, LABEL[p.level], [it.item, it.desc].filter(Boolean).join(' – '), fmt(it.due), Math.max(0, it.diff), sent.has(p.key) ? 'Y' : 'N'].map(q).join(','));
+    }));
+    const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'reminder-log-' + iso(c.today) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  $('results').addEventListener('click', (ev) => {
+    const b = ev.target.closest('button, input[type=checkbox]');
+    if (!b) return;
+    if (b.dataset.f) { filter = b.dataset.f; render(); return; }
+    if (b.id === 'export') { exportLog(); return; }
+    const card = b.closest('.card'); if (!card) return;
+    const p = people[+card.dataset.i];
+    const subj = card.querySelector('.subj').value, body = card.querySelector('.body').value;
+    if (b.dataset.act === 'copy') copy('Subject: ' + subj + '\n\n' + body);
+    if (b.dataset.act === 'copybody') copy(body);
+    if (b.dataset.act === 'mail') {
+      let url = 'mailto:' + encodeURIComponent(p.email || '') + '?subject=' + encodeURIComponent(subj);
+      if (p.email_.cc) url += '&cc=' + encodeURIComponent(p.email_.cc);
+      url += '&body=' + encodeURIComponent(body);
+      window.location.href = url;
+    }
+    if (b.dataset.act === 'sent') {
+      b.checked ? sent.add(p.key) : sent.delete(p.key);
+      card.classList.toggle('sent', b.checked);
+    }
+  });
+
+  function sample() {
+    const t = todayDate();
+    const off = (n) => fmt(new Date(t.getFullYear(), t.getMonth(), t.getDate() + n));
+    const rows = [
+      ['Name', 'Email', 'Department', 'CAR No', 'Description', 'Due Date', 'Status', 'Manager', 'Manager Email'],
+      ['Ahmad Zaki', 'ahmad.zaki@example.com', 'Stor Buangan Terjadual', 'CAR-2026-10-001', 'Spill kit di stor SW kosong', off(-12), 'Open', 'En. Rosli', 'rosli@example.com'],
+      ['Ahmad Zaki', 'ahmad.zaki@example.com', 'Stor Buangan Terjadual', 'CAR-2026-10-002', 'Drum minyak terpakai tanpa label', off(-9), 'Open', 'En. Rosli', 'rosli@example.com'],
+      ['Siti Nurhaliza', 'siti.n@example.com', 'Production Line 2', 'CAR-2026-10-003', 'Operator tidak memakai ear plug di kawasan bising', off(-5), 'Open', 'Pn. Lim', 'lim.manager@example.com'],
+      ['Rajesh Kumar', 'rajesh.k@example.com', 'Maintenance', 'CAR-2026-10-004', 'Log inventori buangan terjadual tidak dikemas kini', off(-2), 'Open', 'Mr. Tan', 'tan.hod@example.com'],
+      ['Mei Ling', 'meiling@example.com', 'QA', 'CAR-2026-10-005', 'Pintu stor kimia tidak berkunci', off(3), 'Open', 'Pn. Lim', 'lim.manager@example.com'],
+      ['Faizal Hassan', 'faizal.h@example.com', 'Production Line 1', 'CAR-2026-10-006', 'Laluan kecemasan dihalang oleh palet', off(-20), 'Closed', 'Pn. Lim', 'lim.manager@example.com'],
+      ['Kumar Selvam', 'kumar.s@example.com', 'Warehouse', 'CAR-2026-10-007', 'Fire extinguisher inspection tag tamat tempoh', off(21), 'Open', 'Mr. Tan', 'tan.hod@example.com']
+    ];
+    $('paste').value = rows.map(r => r.join('\t')).join('\n');
+    generate();
+  }
+
+  $('go').addEventListener('click', generate);
+  $('sample').addEventListener('click', sample);
+  $('file').addEventListener('change', (ev) => {
+    const f = ev.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { $('paste').value = String(r.result).replace(/^﻿/, ''); generate(); };
+    r.readAsText(f);
+  });
+  ['sender', 'title', 'dept', 'soonDays', 'l2From', 'l3From'].forEach(id => {
+    const v = store.get(id); if (v !== null) $(id).value = v;
+    $(id).addEventListener('change', () => { store.set(id, $(id).value); if (people.length) generate(); });
+  });
+  $('today').value = iso(todayDate());
+  $('today').addEventListener('change', () => { if (people.length) generate(); });
+  const saved = store.get('paste');
+  if (saved) { $('paste').value = saved; generate(); } else sample();
+})();
+</script>
+</body>
+</html>

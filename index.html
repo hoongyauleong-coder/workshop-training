@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jabatan Pematuhan</title>
+<style>
+  :root {
+    --bg: #f6f7f4;
+    --surface: #ffffff;
+    --ink: #1c2321;
+    --muted: #5b6662;
+    --line: #dfe3df;
+    --env: #2f7d4f;
+    --env-soft: #e6f2ea;
+    --safety: #c2571a;
+    --safety-soft: #fbece2;
+    --accent: #1f4e79;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141816;
+      --surface: #1d2220;
+      --ink: #e8ece9;
+      --muted: #a3ada8;
+      --line: #2e3532;
+      --env: #6cc28f;
+      --env-soft: #1f3327;
+      --safety: #f0965c;
+      --safety-soft: #3a2619;
+      --accent: #8bb8e8;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+  header {
+    border-bottom: 4px solid var(--env);
+    background: var(--surface);
+    padding: 48px 0 40px;
+  }
+  .eyebrow {
+    font-size: 13px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--env);
+  }
+  h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.15; margin: 8px 0 16px; }
+  .lead { font-size: 18px; color: var(--muted); max-width: 640px; }
+  .who {
+    display: flex; gap: 16px; align-items: center; margin-top: 28px;
+    padding: 16px 20px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--bg); max-width: 520px;
+  }
+  .avatar {
+    flex: none; width: 52px; height: 52px; border-radius: 50%;
+    background: var(--env); color: #fff; display: grid; place-items: center;
+    font-weight: 700; font-size: 18px;
+  }
+  .who strong { display: block; font-size: 18px; }
+  .who span { color: var(--muted); font-size: 14px; }
+  section { padding: 48px 0 8px; }
+  h2 { font-size: 24px; margin-bottom: 6px; }
+  .sub { color: var(--muted); margin-bottom: 24px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 22px;
+  }
+  .card h3 { font-size: 18px; margin-bottom: 8px; }
+  .card ul { padding-left: 18px; color: var(--muted); }
+  .card li { margin: 4px 0; }
+  .tag {
+    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em;
+    padding: 3px 10px; border-radius: 999px; margin-bottom: 12px;
+  }
+  .tag.env { background: var(--env-soft); color: var(--env); }
+  .tag.safety { background: var(--safety-soft); color: var(--safety); }
+  .tag.sop { background: var(--bg); color: var(--accent); border: 1px solid var(--line); }
+  .expect { font-weight: 600; color: var(--ink); margin-top: 12px; font-size: 15px; }
+  ol.steps { list-style: none; padding: 0; display: grid; gap: 12px; counter-reset: s; }
+  ol.steps li {
+    counter-increment: s; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 16px 20px 16px 64px; position: relative;
+  }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 20px; top: 16px;
+    width: 30px; height: 30px; border-radius: 50%; background: var(--accent);
+    color: var(--surface); display: grid; place-items: center; font-weight: 700; font-size: 14px;
+  }
+  ol.steps strong { display: block; }
+  ol.steps span { color: var(--muted); font-size: 15px; }
+  .notice {
+    margin: 48px 0; padding: 24px; border-left: 5px solid var(--safety);
+    background: var(--safety-soft); border-radius: 0 10px 10px 0;
+  }
+  .notice strong { display: block; font-size: 18px; margin-bottom: 6px; }
+  footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Jabatan Pematuhan · Compliance Department</div>
+    <h1>Pematuhan bukan pilihan.<br>Compliance is not optional.</h1>
+    <p class="lead">Kami memantau dan memastikan semua pekerja mematuhi SOP syarikat serta keperluan undang-undang Jabatan Alam Sekitar (DOE) dan Jabatan Keselamatan dan Kesihatan Pekerjaan (DOSH).</p>
+    <div class="who">
+      <div class="avatar">HY</div>
+      <div>
+        <strong>HoongYau</strong>
+        <span>ISO 14001 Auditor · CePSWaM</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <h2>Apa yang kami pantau</h2>
+    <p class="sub">What we monitor, every day.</p>
+    <div class="grid">
+      <div class="card">
+        <span class="tag env">DOE · ALAM SEKITAR</span>
+        <h3>Environmental Compliance</h3>
+        <ul>
+          <li>Environmental Quality Act 1974</li>
+          <li>Scheduled Waste: penyimpanan, pelabelan & inventori</li>
+          <li>Rekod dan pelaporan eSWIS</li>
+          <li>ISO 14001 Environmental Management System</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag safety">DOSH · KESELAMATAN</span>
+        <h3>Safety & Health Compliance</h3>
+        <ul>
+          <li>Occupational Safety and Health Act 1994</li>
+          <li>Pemakaian PPE di kawasan yang ditetapkan</li>
+          <li>Kesiapsiagaan kecemasan & spill response</li>
+          <li>Pemeriksaan tempat kerja berkala</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag sop">SOP SYARIKAT</span>
+        <h3>Company SOP</h3>
+        <ul>
+          <li>Pematuhan prosedur di lantai pengeluaran</li>
+          <li>Tindakan pembetulan (CAR) & penutupan</li>
+          <li>Laporan pemeriksaan bulanan</li>
+          <li>Persediaan audit dalaman & luaran</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Siapa yang kami bantu</h2>
+    <p class="sub">Who we work with, and what we expect from you.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>Production Floor</h3>
+        <ul>
+          <li>Ikut SOP setiap syif</li>
+          <li>Pakai PPE yang dibekalkan</li>
+          <li>Laporkan tumpahan atau bahaya dengan segera</li>
+        </ul>
+        <p class="expect">Expectation: Patuh. Setiap hari. Tanpa pengecualian.</p>
+      </div>
+      <div class="card">
+        <h3>Managers</h3>
+        <ul>
+          <li>Pastikan pasukan anda mematuhi SOP</li>
+          <li>Tutup CAR sebelum tarikh akhir</li>
+          <li>Sokong pemeriksaan dan audit</li>
+        </ul>
+        <p class="expect">Expectation: Accountability for your area.</p>
+      </div>
+      <div class="card">
+        <h3>Scheduled Waste Handlers</h3>
+        <ul>
+          <li>Simpan buangan tidak melebihi had yang ditetapkan</li>
+          <li>Label setiap bekas dengan betul</li>
+          <li>Kemas kini log inventori setiap kali</li>
+        </ul>
+        <p class="expect">Expectation: Tepat. Lengkap. Selari dengan eSWIS.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Bagaimana kami bekerja</h2>
+    <p class="sub">How a finding moves from walkthrough to closure.</p>
+    <ol class="steps">
+      <li><strong>Pemeriksaan (Walkthrough)</strong><span>Pemeriksaan berkala di lantai pengeluaran, stor buangan terjadual dan kawasan kerja.</span></li>
+      <li><strong>Penemuan (Findings)</strong><span>Setiap ketidakpatuhan direkod secara fakta, dengan rujukan undang-undang atau SOP dan tahap keterukan.</span></li>
+      <li><strong>Tindakan Pembetulan (CAR)</strong><span>PIC diberi tindakan dan tarikh akhir. Major NC: 7 hari. Minor NC: 14 hari.</span></li>
+      <li><strong>Susulan (Follow-up)</strong><span>Peringatan dihantar melalui ECOM. Tiada maklum balas akan dieskalasi kepada Ketua Jabatan.</span></li>
+      <li><strong>Penutupan (Closure)</strong><span>Bukti penutupan disemak dan direkod dalam laporan bulanan dan management review.</span></li>
+    </ol>
+  </section>
+
+  <div class="notice">
+    <strong>Ada isu pematuhan? Laporkan sekarang.</strong>
+    If you see a spill, a missing label, or an unsafe condition, report it to the Compliance Department immediately via ECOM. Lebih awal dilaporkan, lebih mudah diperbetulkan.
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">Jabatan Pematuhan · HoongYau, ISO 14001 Auditor · CePSWaM · DOE · DOSH · ISO 14001</div>
+</footer>
+
+</body>
+</html>
